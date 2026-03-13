@@ -1,0 +1,61 @@
+{
+  "name": "@vanar/xbpp",
+  "version": "0.1.0-beta.3",
+  "description": "xBPP - Execution Boundary Permission Protocol for AI agent payments",
+  "main": "dist/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "build": "tsc && tsc -p tsconfig.esm.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "ai-agents",
+    "payments",
+    "policy",
+    "x402",
+    "vanar",
+    "xbpp",
+    "agent",
+    "permission",
+    "governance",
+    "policy-engine",
+    "autonomous-agents"
+  ],
+  "author": "Vanar",
+  "license": "MIT",
+  "homepage": "https://xbpp.org",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/VanarChain/xbpp-sdk"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "bugs": {
+    "url": "https://github.com/VanarChain/xbpp-sdk/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "vitest": "^1.6.0"
+  },
+  "dependencies": {
+    "@vanar/xbpp": "^0.1.0-beta.1"
+  }
+}

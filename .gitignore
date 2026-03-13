@@ -1,0 +1,14 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.mcp.json
+.DS_Store
+.claude/
+.inflectiv/
+coverage/
+*.log
+.env
+.env.*
+.vscode/
+.idea/
+docs/
