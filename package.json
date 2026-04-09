@@ -1,6 +1,6 @@
 {
   "name": "@vanar/xbpp",
-  "version": "0.1.0-beta.3",
+  "version": "0.1.0",
   "description": "xBPP - Execution Boundary Permission Protocol for AI agent payments",
   "main": "dist/index.js",
   "module": "dist/esm/index.js",
@@ -55,7 +55,5 @@
     "typescript": "^5.7.0",
     "vitest": "^1.6.0"
   },
-  "dependencies": {
-    "@vanar/xbpp": "^0.1.0-beta.1"
-  }
+  "dependencies": {}
 }

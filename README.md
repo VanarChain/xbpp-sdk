@@ -10,11 +10,7 @@ A policy engine that evaluates every payment request against 12 configurable che
 
 > **Status: Beta** - This package is `0.1.0-beta.1`. The API may change before `1.0.0`.
 
-| | |
-|---|---|
-| **Vanar** | [vanarchain.com](https://vanarchain.com) |
-| **Protocol** | [xbpp.org](https://xbpp.org) |
-| **Package** | [@vanar/xbpp](https://www.npmjs.com/package/@vanar/xbpp) |
+
 
 ## Install
 
