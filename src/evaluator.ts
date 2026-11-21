@@ -1,4 +1,11 @@
-import type { Policy, PaymentRequest, Verdict, PolicyReason, Decision } from './types';
+import type {
+  Policy,
+  PaymentRequest,
+  Verdict,
+  PolicyReason,
+  Decision,
+  DacsMandateMeta,
+} from './types';
 
 interface TransactionRecord {
   amount: number;
@@ -12,6 +19,80 @@ const FIVE_MINUTES = 5 * 60 * 1000;
 const ONE_HOUR = 60 * 60 * 1000;
 const ONE_DAY = 24 * ONE_HOUR;
 const ONE_MINUTE = 60 * 1000;
+
+function extractDacsMandateMeta(
+  request: PaymentRequest,
+  policy: Policy
+): DacsMandateMeta | undefined {
+  const meta = request.metadata ?? {};
+  const dacsMandate =
+    typeof meta.dacsMandate === 'string'
+      ? meta.dacsMandate
+      : policy.dacs?.dacsMandate;
+  const dacsSessionId =
+    typeof meta.dacsSessionId === 'string'
+      ? meta.dacsSessionId
+      : policy.dacs?.dacsSessionId;
+
+  if (!dacsMandate && !dacsSessionId) {
+    return undefined;
+  }
+
+  const rawMax =
+    meta.dacsMaxAmount !== undefined
+      ? meta.dacsMaxAmount
+      : policy.dacs?.dacsMaxAmount;
+  const rawParentMax =
+    meta.dacsParentMaxAmount !== undefined
+      ? meta.dacsParentMaxAmount
+      : policy.dacs?.dacsParentMaxAmount;
+
+  return {
+    dacsMandate,
+    dacsSessionId,
+    dacsMaxAmount:
+      typeof rawMax === 'number' ||
+      typeof rawMax === 'string' ||
+      typeof rawMax === 'bigint'
+        ? rawMax
+        : undefined,
+    dacsParentMaxAmount:
+      typeof rawParentMax === 'number' ||
+      typeof rawParentMax === 'string' ||
+      typeof rawParentMax === 'bigint'
+        ? rawParentMax
+        : undefined,
+  };
+}
+
+function evaluateDacsSpendMandate(
+  requestedAmount: number,
+  dacsMeta?: DacsMandateMeta
+): PolicyReason | null {
+  if (!dacsMeta || (!dacsMeta.dacsMandate && !dacsMeta.dacsSessionId)) {
+    return null;
+  }
+
+  if (dacsMeta.dacsMaxAmount !== undefined) {
+    const ceiling = Number(dacsMeta.dacsMaxAmount);
+    if (!Number.isFinite(ceiling) || ceiling < 0) {
+      return 'DACS_MANDATE_CEILING_EXCEEDED';
+    }
+
+    if (dacsMeta.dacsParentMaxAmount !== undefined) {
+      const parentCeiling = Number(dacsMeta.dacsParentMaxAmount);
+      if (!Number.isFinite(parentCeiling) || parentCeiling < 0 || ceiling > parentCeiling) {
+        return 'DACS_SUBMANDATE_ATTENUATION_VIOLATION';
+      }
+    }
+
+    if (requestedAmount > ceiling) {
+      return 'DACS_MANDATE_CEILING_EXCEEDED';
+    }
+  }
+
+  return null;
+}
 
 function pruneHistory(): void {
   const cutoff = Date.now() - ONE_DAY;
@@ -71,6 +152,15 @@ export async function evaluate(
   const escalateReasons: PolicyReason[] = [];
 
   pruneHistory();
+
+  // 0. DACS-Standard (§9.5.7 & §14.4) Pre-Flight Spend Mandate Guardrail
+  const dacsViolation = evaluateDacsSpendMandate(
+    request.amount,
+    extractDacsMandateMeta(request, policy)
+  );
+  if (dacsViolation) {
+    blockReasons.push(dacsViolation);
+  }
 
   // 11. AMOUNT_ZERO_OR_NEGATIVE
   if (request.amount <= 0) {
