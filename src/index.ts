@@ -9,6 +9,7 @@ export { riskAverse } from './policies/risk-averse';
 export type {
   Decision,
   PolicyReason,
+  DacsMandateMeta,
   Policy,
   PaymentRequest,
   Verdict,
